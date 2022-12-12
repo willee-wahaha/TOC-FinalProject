@@ -1,3 +1,6 @@
+import os
+import sys
+
 from flask import Flask, jsonify, request, abort, send_file
 from dotenv import load_dotenv
 from linebot import LineBotApi, WebhookParser
@@ -6,6 +9,9 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
 from fsm import TocMachine
 from utils import send_text_message
+
+load_dotenv()
+
 
 machine = TocMachine(
     states=["user", "state1", "state2"],
@@ -29,10 +35,12 @@ machine = TocMachine(
     show_conditions=True,
 )
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="")
 
-channel_secret = os.getenv("7f24cbf068db613d7f7170919e9e30f4", None)
-channel_access_token = os.getenv("IAkszW0SiCZ2XOheMl5ZzRb+WHCKI0pwFGEvSHGBrA1FhKOMhVUamp++54xJ7IESe9RQw+LKxq19PXmrKUqjsVweR9QdedxMpPg74/YVqYlzEcLQtcANfsAk9Jj6ZBjMhGiMTztvIPg7zEGF4rhBIgdB04t89/1O/w1cDnyilFU=", None)
+
+# get channel_secret and channel_access_token from your environment variable
+channel_secret = os.getenv("LINE_CHANNEL_SECRET", None)
+channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
 if channel_secret is None:
     print("Specify LINE_CHANNEL_SECRET as environment variable.")
     sys.exit(1)
@@ -70,6 +78,7 @@ def callback():
 
     return "OK"
 
+
 @app.route("/webhook", methods=["POST"])
 def webhook_handler():
     signature = request.headers["X-Line-Signature"]
@@ -99,11 +108,13 @@ def webhook_handler():
 
     return "OK"
 
+
 @app.route("/show-fsm", methods=["GET"])
 def show_fsm():
     machine.get_graph().draw("fsm.png", prog="dot", format="png")
     return send_file("fsm.png", mimetype="image/png")
 
+
 if __name__ == "__main__":
-    app.debug = False
-    app.run(host='0.0.0.0', port = 30011)
+    port = os.environ.get("PORT", 8000)
+    app.run(host="0.0.0.0", port=port, debug=True)
