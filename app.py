@@ -8,7 +8,7 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 
 from fsm import TocMachine
-from utils import send_text_message
+from utils import send_text_message, send_image_url
 
 load_dotenv()
 
@@ -24,7 +24,7 @@ machine = TocMachine(
         },
         {
             "trigger": "advance",
-            "source": "user",
+            "source": "state1",
             "dest": "state2",
             "conditions": "is_going_to_state2",
         },
@@ -64,7 +64,17 @@ machine = TocMachine(
             "dest": "state8",
             "conditions": "is_going_to_state8",
         },
-        {"trigger": "go_back", "source": ["state1", "state2", "state3", "state4", "state5", "state6", "state7", "state8"], "dest": "user"},
+        {
+            "trigger": "advance", 
+            "source": ["state2", "state3", "state4", "state5", "state6", "state7"], 
+            "dest": "user", 
+            "conditions": "is_going_to_user",
+        },
+        {
+            "trigger": "go_back", 
+            "source": ["state8"], 
+            "dest": "user", 
+        },
     ],
     initial="user",
     auto_transitions=False,
@@ -149,6 +159,14 @@ def webhook_handler():
 def show_fsm():
     machine.get_graph().draw("fsm.png", prog="dot", format="png")
     return send_file("fsm.png", mimetype="image/png")
+
+@app.route('/get_image', methods = ['GET'])
+def get_data():
+    print(request.args.get('value'))
+    try:
+        return send_file(("image/" + request.args.get('value') + ".png"), mimetype="image/png")
+    except:
+        print("error")
 
 
 if __name__ == "__main__":

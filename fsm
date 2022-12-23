@@ -9,7 +9,7 @@ digraph "State Machine" {
 	state4 [label="state4\l"]
 	state5 [label="state5\l"]
 	state6 [label="state6\l"]
-	state7 [label="state7\l" color=blue fillcolor=azure2 peripheries=1]
+	state7 [label="state7\l"]
 	state8 [label="state8\l"]
 	user -> state1 [label="advance [is_going_to_state1]"]
 	user -> state2 [label="advance [is_going_to_state2]"]
@@ -25,6 +25,6 @@ digraph "State Machine" {
 	state4 -> user [label=go_back]
 	state5 -> user [label=go_back]
 	state6 -> user [label=go_back]
-	state7 -> user [label=go_back color=blue]
+	state7 -> user [label=go_back]
 	state8 -> user [label=go_back]
 }
