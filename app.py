@@ -14,17 +14,17 @@ load_dotenv()
 
 #need change
 machine = TocMachine(
-    states=["user", "in_game", "output_image", "save", "no_save", "new_game", "load_game", "create_player", "state7", "draw"],
+    states=["user", "in_game", "output_image", "save", "no_save", "new_game", "load_game", "create_player", "meet_monster", "fighting", "draw"],
     transitions=[
         {
             "trigger": "advance",
-            "source": ["save", "no_save", "new_game", "load_game", "create_player", "state7"],
+            "source": ["save", "no_save", "new_game", "load_game", "create_player", "meet_monster"],
             "dest": "in_game",
             "conditions": "play_game",
         },
         {
             "trigger": "advance",
-            "source": ["in_game", "create_player"],
+            "source": ["in_game", "create_player", "meet_monster"],
             "dest": "save",
             "conditions": "saving",
         },
@@ -36,7 +36,7 @@ machine = TocMachine(
         },
         {
             "trigger": "advance",
-            "source": "in_game",
+            "source": ["in_game", "create_player", "meet_monster"],
             "dest": "no_save",
             "conditions": "no_save_check",
         },
@@ -48,13 +48,13 @@ machine = TocMachine(
         },
         {
             "trigger": "advance",
-            "source": "user",
+            "source": ["user", "in_game", "create_player", "meet_monster"],
             "dest": "load_game",
             "conditions": "open_load_game",
         },
         {
             "trigger": "advance",
-            "source": "in_game",
+            "source": ["in_game", "create_player"],
             "dest": "output_image",
             "conditions": "output_character_image",
         },
@@ -66,9 +66,15 @@ machine = TocMachine(
         },
         {
             "trigger": "advance",
-            "source": "in_game",
-            "dest": "state7",
-            "conditions": "is_going_to_state7",
+            "source": ["in_game", "meet_monster", "create_player"],
+            "dest": "meet_monster",
+            "conditions": "meet_a_monster",
+        },
+        {
+            "trigger": "advance",
+            "source": ["in_game", "meet_monster"],
+            "dest": "fighting",
+            "conditions": "on_fight",
         },
         {
             "trigger": "advance",
@@ -84,7 +90,7 @@ machine = TocMachine(
         },
         {
             "trigger": "go_back", 
-            "source": ["output_image"], 
+            "source": ["output_image", "fighting"], 
             "dest": "in_game", 
         },
         {

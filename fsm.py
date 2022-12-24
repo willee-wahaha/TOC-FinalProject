@@ -7,7 +7,7 @@ from PIL import Image
 
 from utils import send_text_message, send_image_url, channel_access_token
 
-from data import get_name, get_photo, reset, create, save, load
+from data import *
 
 class TocMachine(GraphMachine):
     def __init__(self, **machine_configs):
@@ -45,9 +45,13 @@ class TocMachine(GraphMachine):
         text = event.message.text
         return text.lower() == "create"
 
-    def is_going_to_state7(self, event):
+    def meet_a_monster(self, event):
         text = event.message.text
-        return text.lower() == "go to state7"
+        return text.lower() == "find monster"
+
+    def on_fight(self, event):
+        text = event.message.text
+        return text.lower() == "fight"
     
     def draw_and_show_fsm(self, event):
         text = event.message.text
@@ -63,20 +67,26 @@ class TocMachine(GraphMachine):
         print("I'm entering state1")
         
         reply_token = event.reply_token
-        send_text_message(reply_token, "Character's name : " + get_name())
+        if(get_level() == -1):
+            send_text_message(reply_token, "No cahracter yet")
+        else:
+            send_text_message(reply_token, "Character's name : " + get_name() + "\nCharacter's level : " + str(get_level()))
 
     def on_enter_output_image(self, event):
 
         reply_token = event.reply_token
 
-        r = requests.get("http://localhost:4040/api/tunnels")
-        tunnels = r.json()['tunnels']
-        
-        for tunnel in tunnels:
-            if tunnel['proto'] == "http" or tunnel['proto'] == "https":
-                print(str(tunnel['public_url']) +  "/get_image?value=" + get_photo())
-                send_image_url(reply_token, (str(tunnel['public_url']) +  "/get_image?value=" + get_photo()))
-                break
+        if(get_level() == -1):
+            send_text_message(reply_token, "No cahracter yet")
+        else:
+            r = requests.get("http://localhost:4040/api/tunnels")
+            tunnels = r.json()['tunnels']
+            
+            for tunnel in tunnels:
+                if tunnel['proto'] == "http" or tunnel['proto'] == "https":
+                    print(str(tunnel['public_url']) +  "/get_image?value=" + get_photo())
+                    send_image_url(reply_token, (str(tunnel['public_url']) +  "/get_image?value=" + get_photo()))
+                    break
 
         self.go_back()
 
@@ -104,7 +114,7 @@ class TocMachine(GraphMachine):
         reset()
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state4")
+        send_text_message(reply_token, "open a new game")
 
     def on_enter_load_game(self, event):
         print("I'm entering state5")
@@ -112,7 +122,7 @@ class TocMachine(GraphMachine):
         load()
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state5")
+        send_text_message(reply_token, "loading game")
 
     def on_enter_create_player(self, event):
         print("I'm entering state6")
@@ -122,13 +132,34 @@ class TocMachine(GraphMachine):
         print(get_photo())
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "New character created named : " + get_name())
+        send_text_message(reply_token, "New character created named : " + get_name() + "\nCharacter's level : " + str(get_level()))
 
-    def on_enter_state7(self, event):
+    def on_enter_meet_monster(self, event):
         print("I'm entering state7")
+        
+        reply_token = event.reply_token
+        if(get_level() == -1):
+            send_text_message(reply_token, "No cahracter yet")
+        else:
+            new_monster()
+            send_text_message(reply_token, "Monster name : " + get_monster_name() + "\nMonster level : " + str(get_monster_level()))
+
+    def on_enter_fighting(self, event):
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state7")
+
+        if(get_level() == -1):
+            send_text_message(reply_token, "No cahracter yet")
+        elif(get_monster_level() == -1):
+            send_text_message(reply_token, "No Monster yet")
+        else:
+            result = fight_with_monster()
+            if(result == 1):
+                send_text_message(reply_token, "Win!!\nCharacter's name : " + get_name() + "\nCharacter's level : " + str(get_level()))
+            else:
+                send_text_message(reply_token, "Lose\nYour character died, please create new character.")
+
+        self.go_back()
 
     def on_enter_draw(self, event):
         print("I'm entering state8")
