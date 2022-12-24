@@ -3,6 +3,7 @@
 ## Requirement
 
 - python 3.10.8  
+- Visual Studio C/C++
 - graphviz(version > 2.24.0)(remember add graphviz to PATH)  
 - pipenv
 
