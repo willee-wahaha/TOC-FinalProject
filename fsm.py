@@ -1,51 +1,57 @@
 import os
 import requests
 import time
+import random
 from transitions.extensions import GraphMachine
 from PIL import Image
 
 from utils import send_text_message, send_image_url, channel_access_token
 
-#need change
+from data import get_name, get_photo, reset, create, save, load
+
 class TocMachine(GraphMachine):
     def __init__(self, **machine_configs):
         self.machine = GraphMachine(model=self, **machine_configs)
 
     def is_going_to_user(self, event):
         text = event.message.text
-        return text.lower() == "go to user"
+        return text.lower() == "quit game"
 
-    def is_going_to_state1(self, event):
+    def play_game(self, event):
         text = event.message.text
-        return text.lower() == "go to state1"
+        return text.lower() == "play"
 
-    def is_going_to_state2(self, event):
+    def output_character_image(self, event):
         text = event.message.text
-        return text.lower() == "go to state2"
+        return text.lower() == "show my photo"
 
-    def is_going_to_state3(self, event):
+    def saving(self, event):
         text = event.message.text
-        return text.lower() == "go to state3"
+        return text.lower() == "save"
+
+    def no_save_check(self, event):
+        text = event.message.text
+        return text.lower() == "quit game"
     
-    def is_going_to_state4(self, event):
+    def open_new_game(self, event):
         text = event.message.text
-        return text.lower() == "go to state4"
+        return text.lower() == "new game"
 
-    def is_going_to_state5(self, event):
+    def open_load_game(self, event):
         text = event.message.text
-        return text.lower() == "go to state5"
+        return text.lower() == "load game"
     
-    def is_going_to_state6(self, event):
+    def create_new_player(self, event):
         text = event.message.text
-        return text.lower() == "go to state6"
+        return text.lower() == "create"
 
     def is_going_to_state7(self, event):
         text = event.message.text
         return text.lower() == "go to state7"
     
-    def is_going_to_state8(self, event):
+    def draw_and_show_fsm(self, event):
         text = event.message.text
-        return text.lower() == "fsm"
+        return text.lower() == "show fsm"
 
     def on_enter_user(self, event):
         print("I'm entering user")
@@ -53,49 +59,70 @@ class TocMachine(GraphMachine):
         reply_token = event.reply_token
         send_text_message(reply_token, "Trigger user")
 
-    def on_enter_state1(self, event):
+    def on_enter_in_game(self, event):
         print("I'm entering state1")
-
-        reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state1")
-
-    def on_enter_state2(self, event):
-        print("I'm entering state2")
-
-        reply_token = event.reply_token
         
+        reply_token = event.reply_token
+        send_text_message(reply_token, "Character's name : " + get_name())
+
+    def on_enter_output_image(self, event):
+
+        reply_token = event.reply_token
+
         r = requests.get("http://localhost:4040/api/tunnels")
         tunnels = r.json()['tunnels']
         
         for tunnel in tunnels:
             if tunnel['proto'] == "http" or tunnel['proto'] == "https":
-                send_image_url(reply_token, (str(tunnel['public_url']) +  "/get_image?value=FR9W2eDXoAAMv-j"))
+                print(str(tunnel['public_url']) +  "/get_image?value=" + get_photo())
+                send_image_url(reply_token, (str(tunnel['public_url']) +  "/get_image?value=" + get_photo()))
                 break
-        #send_text_message(reply_token, "Trigger state2")
 
-    def on_enter_state3(self, event):
+        self.go_back()
+
+    def on_exit_output_image(self):
+        print("Leaving image")
+
+    def on_enter_save(self, event):
+        print("I'm entering state2")
+
+        save()
+
+        reply_token = event.reply_token
+
+        send_text_message(reply_token, "Save Success!")
+
+    def on_enter_no_save(self, event):
         print("I'm entering state3")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state3")
+        send_text_message(reply_token, "Not save yet!")
 
-    def on_enter_state4(self, event):
+    def on_enter_new_game(self, event):
         print("I'm entering state4")
+
+        reset()
 
         reply_token = event.reply_token
         send_text_message(reply_token, "Trigger state4")
 
-    def on_enter_state5(self, event):
+    def on_enter_load_game(self, event):
         print("I'm entering state5")
+
+        load()
 
         reply_token = event.reply_token
         send_text_message(reply_token, "Trigger state5")
 
-    def on_enter_state6(self, event):
+    def on_enter_create_player(self, event):
         print("I'm entering state6")
 
+        create()
+        print(get_name())
+        print(get_photo())
+
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state6")
+        send_text_message(reply_token, "New character created named : " + get_name())
 
     def on_enter_state7(self, event):
         print("I'm entering state7")
@@ -103,7 +130,7 @@ class TocMachine(GraphMachine):
         reply_token = event.reply_token
         send_text_message(reply_token, "Trigger state7")
 
-    def on_enter_state8(self, event):
+    def on_enter_draw(self, event):
         print("I'm entering state8")
 
         reply_token = event.reply_token
@@ -139,5 +166,5 @@ class TocMachine(GraphMachine):
 
         self.go_back()
 
-    def on_exit_state8(self):
-        print("Leaving state8")
+    def on_exit_draw(self):
+        print("Leaving fsm")
