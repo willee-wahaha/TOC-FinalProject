@@ -1,6 +1,28 @@
 import random
 
-names = ["aaa", "bbb", "ccc"]
+names = ["Amelia",
+"Benjamin",
+"Charlotte",
+"David",
+"Emily",
+"Finn",
+"Grace",
+"Henry",
+"Isabella",
+"Jack",
+"Lily",
+"Max",
+"Olivia",
+"Percy",
+"Quinn",
+"Ruby",
+"Samuel",
+"Tess",
+"Umberto",
+"Violet",
+"Wyatt",
+"Zoe",
+]
 pics = ["FR9W2eDXoAAMv-j", "E2RdeZHWQAYqeND", "ExXH73KXAAIGcvq"]
 chars = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 
