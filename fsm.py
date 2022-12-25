@@ -61,7 +61,7 @@ class TocMachine(GraphMachine):
         print("I'm entering user")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger user")
+        send_text_message(reply_token, "choose what you want to do:\n\"show fsm\"\n\"new game\"\n\"load game\"")
 
     def on_enter_in_game(self, event):
         print("I'm entering state1")
