@@ -132,7 +132,7 @@ def create():
 
 def new_monster():
 
-    filename = 'savedata.txt'
+    filename = 'data.txt'
     with open(filename) as f:
         i = 0
         for lines in f.readlines():
