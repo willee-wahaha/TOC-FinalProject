@@ -151,7 +151,7 @@ def new_monster():
     for i in range(l):
         m_name = m_name + chars[random.randint(0, len(chars) - 1)]
     
-    low = char_level / 5
+    low = int(char_level / 5)
     if(low <= 0): 
         low = 1
     m_level = random.randint(low, char_level * 5)
